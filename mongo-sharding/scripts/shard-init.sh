@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker compose exec -T configSrv mongosh --port 27017 <<EOF
+docker compose exec -T configSrv mongosh --port 27017 --quiet <<EOF
 rs.initiate(
   {
     _id : "config_server",
@@ -9,11 +9,10 @@ rs.initiate(
       { _id : 0, host : "configSrv:27017" }
     ]
   }
-);
-exit();
+)
 EOF
 
-docker compose exec -T shard1 mongosh --port 27018 <<EOF
+docker compose exec -T shard1 mongosh --port 27018 --quiet <<EOF
 rs.initiate(
     {
       _id : "shard1",
@@ -21,11 +20,10 @@ rs.initiate(
         { _id : 0, host : "shard1:27018" },
       ]
     }
-);
-exit();
+)
 EOF
 
-docker compose exec -T shard2 mongosh --port 27019 <<EOF
+docker compose exec -T shard2 mongosh --port 27019 --quiet <<EOF
 rs.initiate(
     {
       _id : "shard2",
@@ -33,13 +31,12 @@ rs.initiate(
         { _id : 0, host : "shard2:27019" },
       ]
     }
-);
-exit();
+)
 EOF
 
-docker compose exec -T router mongosh --port 27020 <<EOF
-sh.addShard( "shard1/shard1:27018");
-sh.addShard( "shard2/shard2:27019");
-sh.enableSharding("somedb");
+docker compose exec -T router mongosh --port 27020 --quiet <<EOF
+sh.addShard( "shard1/shard1:27018")
+sh.addShard( "shard2/shard2:27019")
+sh.enableSharding("somedb")
 sh.shardCollection("somedb.helloDoc", { "name" : "hashed" } )
 EOF
